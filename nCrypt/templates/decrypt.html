@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" data-theme="system" data-animate="true" data-snap="true" data-sync-scrollbar="true">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>nCrypt</title>
+
+  <!-- Selector styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const iterationsInput = document.getElementById('iterations');
+			const copyButton = document.getElementById('copy-button');
+			const plaintextArea = document.getElementById('plaintext'); // Note: plaintext for decrypt output
+			
+			// Iterations validation (your existing code)
+			if (iterationsInput) {
+				iterationsInput.addEventListener('blur', function(e) {
+					let value = parseFloat(e.target.value);
+					
+					if (isNaN(value) || value < 1) {
+						e.target.value = 1;
+					} else {
+						e.target.value = Math.floor(value);
+					}
+				});
+			}
+			
+			// Copy to clipboard functionality
+			if (copyButton) {
+				copyButton.addEventListener('click', function() {
+					if (plaintextArea.value.trim() === '') {
+						return; // Don't copy if empty
+					}
+					
+					plaintextArea.select();
+					plaintextArea.setSelectionRange(0, 99999); // For mobile devices
+					
+					navigator.clipboard.writeText(plaintextArea.value).then(function() {
+						// Show success feedback
+						const originalText = copyButton.textContent;
+						copyButton.textContent = 'COPIED!';
+						copyButton.style.background = 'linear-gradient(135deg, rgba(100, 255, 100, 0.3), rgba(100, 255, 100, 0.2))';
+						copyButton.style.borderColor = '#64ff64';
+						copyButton.style.color = '#64ff64';
+						
+						// Reset after 2 seconds
+						setTimeout(() => {
+							copyButton.textContent = originalText;
+							copyButton.style.background = '';
+							copyButton.style.borderColor = '';
+							copyButton.style.color = '';
+						}, 2000);
+					}).catch(function() {
+						// Fallback for older browsers
+						try {
+							document.execCommand('copy');
+							alert('Copied to clipboard!');
+						} catch (err) {
+							alert('Could not copy to clipboard');
+						}
+					});
+				});
+			}
+		});
+	</script>
+	<div class="logo-wrapper">
+		<img
+		src="{{ url_for('static', filename='nCrypt-logo.png') }}"
+		alt="nCrypt logo"
+		width="360"
+		height="auto"
+		loading="lazy"
+		>
+	</div>
+	<br>
+	<div class="tech-nav">
+		<a href="{{ url_for('encrypt') }}" class="tech-link">Encrypt</a>
+		<span class="tech-divider">|</span>
+		<span class="tech-link tech-active">Decrypt</span>
+	</div>
+	<form method="POST" action="{{ url_for('decrypt') }}">
+    <div class="form-container">
+        <div class="input-row">
+            <div class="input-group">
+                <label for="passphrase">Passphrase</label>
+                <input type="password" id="passphrase" name="passphrase" placeholder="Enter decryption passphrase">
+            </div>
+            <div class="input-group">
+                <label for="iterations">n(umber of Encryption Iterations)</label>
+                <input type="number" id="iterations" name="iterations" value="1000" min="1" step="1" placeholder="1000">
+            </div>
+        </div>
+        <br>
+        <div class="input-group">
+            <label for="ciphertext">Text to Decrypt</label>
+            <textarea id="ciphertext" name="ciphertext" rows="8" placeholder="Enter text to decrypt..."></textarea>
+        </div>
+        <div class="button-container">
+            <button type="submit" id="decrypt-button" class="button">DECRYPT</button>
+        </div>
+        <br>
+        <div class="input-group">
+            <label for="plaintext">Decrypted Output</label>
+            <textarea id="plaintext" name="plaintext" rows="8" placeholder="Decrypted text will appear here..." readonly>{{ plaintext or '' }}</textarea>
+        </div>
+        <div class="button-container">
+            <button type="button" id="copy-button" class="button" {% if not plaintext %}disabled{% endif %}>COPY OUTPUT</button>
+        </div>
+    </div>
+</form>
+</body>
