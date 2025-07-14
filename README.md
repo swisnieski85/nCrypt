@@ -155,12 +155,24 @@ For production, set `debug=False` and use a proper WSGI server.
 
 ## License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-[Add contribution guidelines here]
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
+
+Please ensure your code follows security best practices, especially when dealing with cryptographic functions.
 
 ## Support
 
-[Add support/contact information here]
+If you encounter any issues or have questions:
+- Open an [issue](https://github.com/swisnieski85/nCrypt/issues) on GitHub
+- For security-related concerns, please email directly rather than opening a public issue
+
+**Note**: This is an educational project. For production use, please review the security considerations and implement additional safeguards as needed.
