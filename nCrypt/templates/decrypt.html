@@ -81,6 +81,11 @@
 		<span class="tech-divider">|</span>
 		<span class="tech-link tech-active">Decrypt</span>
 	</div>
+	{% if status_message %}
+	<div class="status-message status-{{ status_type }}">
+		{{ status_message }}
+	</div>
+	{% endif %}
 	<form method="POST" action="{{ url_for('decrypt') }}">
     <div class="form-container">
         <div class="input-row">
