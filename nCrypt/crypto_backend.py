@@ -20,33 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os
-import base64
-import struct
-import webbrowser
+import os, base64, struct
 
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding, hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
-from crypto_backend import encrypt as _enc, dencrypt as _dec
-from typing import Union
 
-def ncrypt(passphrase: str, data: str, iterations: int = 200_000) -> str:
-    return _enc(passphrase, data, iterations)
-
-def dencrypt(passphrase: str, encrypted_payload: str) -> str:
-    return _dec(passphrase, encrypted_payload)
-
-def open_browser():
-    # Opens browser window
-    webbrowser.open_new('http://127.0.0.1:5000/')
-
-def _to_bytes(val: Union[str, bytes]) -> bytes:
-    return val.encode("utf-8") if isinstance(val, str) else val
-
-def _derive_key(passphrase: bytes, salt: bytes, iterations: int) -> bytes:
-    """Derive a 32‑byte key with PBKDF2‑HMAC‑SHA‑256."""
+def derive_key(passphrase: bytes, salt: bytes, iterations: int) -> bytes:
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -55,3 +36,39 @@ def _derive_key(passphrase: bytes, salt: bytes, iterations: int) -> bytes:
         backend=default_backend(),
     )
     return kdf.derive(passphrase)
+
+def encrypt(passphrase: str, plaintext: str, iterations: int = 200_000) -> str:
+    p_bytes = plaintext.encode()
+    pass_bytes = passphrase.encode()
+
+    salt = os.urandom(16)
+    iv   = os.urandom(12)
+    key  = derive_key(pass_bytes, salt, iterations)
+
+    encryptor = Cipher(
+        algorithms.AES(key), modes.GCM(iv), backend=default_backend()
+    ).encryptor()
+
+    ct = encryptor.update(p_bytes) + encryptor.finalize()
+    tag = encryptor.tag
+
+    payload = (
+        struct.pack(">I", iterations) + salt + iv + ct + tag
+    )
+    return base64.b64encode(payload).decode()
+
+def dencrypt(passphrase: str, b64_payload: str) -> str:
+    data = base64.b64decode(b64_payload)
+    iterations = struct.unpack(">I", data[:4])[0]
+    salt = data[4:20]
+    iv   = data[20:32]
+    tag  = data[-16:]
+    ct   = data[32:-16]
+
+    key = derive_key(passphrase.encode(), salt, iterations)
+    decryptor = Cipher(
+        algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend()
+    ).decryptor()
+
+    pt = decryptor.update(ct) + decryptor.finalize()
+    return pt.decode()

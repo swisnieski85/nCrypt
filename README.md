@@ -1,178 +1,144 @@
 # nCrypt
 
-A Flask-based web application for secure text encryption and decryption using AES-256-CBC encryption with PBKDF2 key derivation.
+A Flask-based local web application for securely encrypting and decrypting sensitive text using modern cryptography. Designed for users who want to store passwords or other secrets encrypted locally with a custom passphrase and a user-defined security strength.
 
 ## Features
 
-- **AES-256-CBC Encryption**: Industry-standard encryption algorithm
-- **PBKDF2 Key Derivation**: Secure password-based key generation with configurable iterations
-- **Web Interface**: Clean, dark-themed UI for easy encryption/decryption
-- **Copy to Clipboard**: One-click copying of encrypted/decrypted results
-- **Base64 Encoding**: Safe text representation of encrypted data
-- **Configurable Security**: Adjustable iteration count for key derivation strength
+- **AES-256-GCM Encryption**: Authenticated symmetric encryption (secure and tamper-proof)
+- **PBKDF2-SHA256 Key Derivation**: Key generation with user-defined iteration strength
+- **All-In-One Payload**: Salt, IV, iteration count, and ciphertext stored together
+- **Web Interface**: Clean, dark-themed UI with separate encrypt/decrypt pages
+- **Auto-launch**: Automatically opens in your browser when you run the app
+- **Clipboard Support**: One-click copy for encrypted/decrypted results
+- **Base64 Encoding**: Output is safe for storage in plain-text files
 
 ## Screenshots
 
-The application features a modern dark interface with separate pages for encryption and decryption operations.
+*(Add screenshots here if desired)*
 
 ## Installation
 
 ### Prerequisites
 - Python 3.7+
-- pip package manager
+- `pip` (Python package manager)
 
 ### Dependencies
-```bash
-pip install flask cryptography
-```
 
-### Setup
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd nCrypt
-```
+Install dependencies with:
 
-2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Run the application:
-```bash
-python app.py
+Contents of `requirements.txt`:
+
+```
+Flask==3.1.1
+cryptography==45.0.5
 ```
 
-4. Open your browser and navigate to `http://localhost:5000`
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/swisnieski85/nCrypt
+   cd nCrypt
+   ```
+
+2. Run the app:
+   ```bash
+   python app.py
+   ```
+
+3. Your browser will automatically open to `http://localhost:5000`. If it doesn't, open a browser tab and paste in `http://localhost:5000` manually, then hit Enter.
 
 ## Usage
 
-### Encryption
-1. Navigate to the **Encrypt** page (default)
-2. Enter your passphrase
-3. Set the number of encryption iterations (default: 1000)
-4. Enter the text you want to encrypt
-5. Click **ENCRYPT**
-6. Copy the resulting encrypted text using the **COPY OUTPUT** button
+### Encrypt
 
-### Decryption
+1. Navigate to the **Encrypt** page
+2. Enter your secret passphrase
+3. Choose a key derivation strength (default: 200,000 iterations; range between 100,000 and 5,000,000)
+4. Enter the text to encrypt
+5. Click **ENCRYPT**
+6. Copy the resulting encrypted text for storage
+
+### Decrypt
+
 1. Navigate to the **Decrypt** page
-2. Enter the same passphrase used for encryption
-3. Set the same number of iterations used during encryption
-4. Paste the encrypted text
-5. Click **DECRYPT**
-6. Copy the decrypted result using the **COPY OUTPUT** button
+2. Enter the passphrase used for encryption (it is not necessary to enter the iteration count again; this is stored with the encrypted text)
+3. Paste the encrypted text
+4. Click **DECRYPT**
+5. Copy the decrypted result
+
+**Note**: You no longer need to specify the iteration count when decrypting. It's stored in the encrypted payload itself.
 
 ## Technical Details
 
-### Encryption Process
-- **Algorithm**: AES-256 in CBC mode
-- **Key Derivation**: PBKDF2 with SHA-256
-- **Salt**: 16 random bytes generated per encryption
-- **IV**: 16 random bytes generated per encryption
-- **Padding**: PKCS7 padding for block alignment
-- **Output Format**: Base64-encoded string containing salt + IV + ciphertext
+### Encryption Overview
 
-### Security Features
-- Cryptographically secure random salt and IV generation
-- Configurable PBKDF2 iterations (minimum 1, default 1000)
-- Proper PKCS7 padding implementation
-- Memory-safe byte handling
+- **Algorithm**: AES-256 in GCM mode (provides integrity and confidentiality)
+- **Key Derivation**: PBKDF2 with SHA-256
+- **Salt**: 16 bytes, randomly generated per encryption
+- **IV (Nonce)**: 12 bytes, randomly generated per encryption
+- **Iterations**: 4-byte integer prepended to payload (default: 200,000)
+- **Output**: Base64-encoded string of `[iterations][salt][iv][ciphertext][tag]`
+
+### Payload Structure
+
+```
+[4-byte iteration count] +
+[16-byte salt] +
+[12-byte IV] +
+[variable ciphertext] +
+[16-byte GCM tag]
+```
+
+This design enables the decryption function to derive everything it needs from the input ciphertext, except for the passphrase.
 
 ## File Structure
 
 ```
 nCrypt/
-├── app.py              # Flask application and routes
-├── utils.py            # Encryption/decryption utilities
+├── app.py              # Flask application logic
+├── utils.py            # Cryptographic functions
 ├── templates/
-│   ├── encrypt.html    # Encryption page template
-│   └── decrypt.html    # Decryption page template
+│   ├── encrypt.html    # Encrypt page
+│   └── decrypt.html    # Decrypt page
 ├── static/
-│   ├── styles.css      # Application styling
-│   └── nCrypt-logo.png # Application logo
-└── README.md
+│   ├── styles.css      # App styling
+│   └── nCrypt-logo.png # Logo
+├── requirements.txt    # Python dependencies
+└── README.md           # This file
 ```
-
-## API Reference
-
-### Core Functions
-
-#### `ncrypt(passphrase, data, iterations=1000)`
-Encrypts plaintext data using AES-256-CBC.
-
-**Parameters:**
-- `passphrase` (str): Password for encryption
-- `data` (str): Plaintext to encrypt
-- `iterations` (int): PBKDF2 iterations (default: 1000)
-
-**Returns:** Base64-encoded encrypted string
-
-#### `dencrypt(passphrase, encrypted_data, iterations=1000)`
-Decrypts AES-256-CBC encrypted data.
-
-**Parameters:**
-- `passphrase` (str): Password for decryption
-- `encrypted_data` (str): Base64-encoded encrypted data
-- `iterations` (int): PBKDF2 iterations (must match encryption)
-
-**Returns:** Decrypted plaintext string
-
-### Flask Routes
-
-- `GET /` - Redirects to encryption page
-- `GET/POST /encrypt` - Encryption interface
-- `GET/POST /decrypt` - Decryption interface
-
-## Browser Compatibility
-
-- Modern browsers with JavaScript enabled
-- Clipboard API support for copy functionality
-- CSS Grid and Flexbox support
 
 ## Security Considerations
 
-- **Passphrase Strength**: Use strong, unique passphrases
-- **Iteration Count**: Higher iterations provide better security but slower performance
-- **HTTPS**: Use HTTPS in production to protect data in transit
-- **Local Processing**: All encryption/decryption happens server-side
-
-## Development
-
-### Debug Mode
-The application runs in debug mode by default for development:
-```python
-app.run(debug=True)
-```
-
-For production, set `debug=False` and use a proper WSGI server.
-
-### Dependencies
-- **Flask**: Web framework
-- **cryptography**: Cryptographic operations
-- **os**: System operations for random generation
-- **base64**: Encoding/decoding operations
+- Use **strong, unique** passphrases
+- Higher iteration counts improve brute-force resistance (default: 200k)
+- Keep the passphrase secret; encryption is only as strong as the key
+- This app performs **local** encryption only (data never leaves your machine)
+- In production, consider running under HTTPS and using environment-based secrets
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Pull requests are welcome!
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
+1. Fork the repo
+2. Create a feature branch (`git checkout -b my-feature`)
 3. Commit your changes (`git commit -m 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Open a Pull Request
-
-Please ensure your code follows security best practices, especially when dealing with cryptographic functions.
+4. Push to your fork (`git push origin my-feature`)
+5. Open a pull request
 
 ## Support
 
-If you encounter any issues or have questions:
-- Open an [issue](https://github.com/swisnieski85/nCrypt/issues) on GitHub
-- For security-related concerns, please email directly rather than opening a public issue
+If you encounter an issue or want to suggest improvements:
 
-**Note**: This is an educational project. For production use, please review the security considerations and implement additional safeguards as needed.
+- Open an [Issue](https://github.com/swisnieski85/nCrypt/issues)
+- For sensitive questions, contact directly instead of posting publicly (you may e-mail me at the non-numeric portion of my username at gmail.com)
+
+**Note**: This project is educational in nature. While the cryptographic implementation follows best practices, any use in real-world secure systems should be reviewed and audited appropriately.
