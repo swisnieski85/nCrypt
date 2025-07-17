@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - KDF iteration clamping now respects values from `config.yaml`.
 - Updated default KDF iteration count to 310,000 (per OWASP recommendation).
-- Increased maximum allowed iterations to 50 million.
+- Increased maximum allowed iterations to 50 million.\
+- Minor revisions to README.md.
 
 
 ## [1.2.0] - 2025-07-16

@@ -12,10 +12,6 @@ A Flask-based local web application for securely encrypting and decrypting sensi
 - **Clipboard Support**: One-click copy for encrypted/decrypted results
 - **Base64 Encoding**: Output is safe for storage in plain-text files
 
-## Screenshots
-
-*(Add screenshots here if desired)*
-
 ## Installation
 
 ### Prerequisites
@@ -58,7 +54,7 @@ cryptography==45.0.5
 
 1. Navigate to the **Encrypt** page
 2. Enter your secret passphrase
-3. Choose a key derivation strength (default: 200,000 iterations; range between 100,000 and 5,000,000)
+3. Choose a key derivation strength (default: 310,000 iterations; range between 100,000 and 50,000,000)
 4. Enter the text to encrypt
 5. Click **ENCRYPT**
 6. Copy the resulting encrypted text for storage
@@ -81,7 +77,7 @@ cryptography==45.0.5
 - **Key Derivation**: PBKDF2 with SHA-256
 - **Salt**: 16 bytes, randomly generated per encryption
 - **IV (Nonce)**: 12 bytes, randomly generated per encryption
-- **Iterations**: 4-byte integer prepended to payload (default: 200,000)
+- **Iterations**: 4-byte integer prepended to payload (default: 310,000)
 - **Output**: Base64-encoded string of `[iterations][salt][iv][ciphertext][tag]`
 
 ### Payload Structure
@@ -114,8 +110,8 @@ nCrypt/
 
 ## Security Considerations
 
-- Use **strong, unique** passphrases
-- Higher iteration counts improve brute-force resistance (default: 200k)
+- Use **strong, unique** passphrases (ideally high-entropy strings containing several unique words)
+- Higher iteration counts improve brute-force resistance (default: 310k)
 - Keep the passphrase secret; encryption is only as strong as the key
 - This app performs **local** encryption only (data never leaves your machine)
 - In production, consider running under HTTPS and using environment-based secrets
