@@ -23,14 +23,24 @@
 import os
 import threading
 import secrets
+import yaml
 
 from flask import Flask, render_template, url_for, redirect, request
 from flask_wtf import CSRFProtect
 from utils import ncrypt, dencrypt, open_browser
+from pathlib import Path
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(64)
 csrf = CSRFProtect(app)
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+CONFIG_PATH = ROOT_DIR / "config.yaml"
+
+with open(CONFIG_PATH, "r") as f:
+    config = yaml.safe_load(f)
+
+kdf_config = config['kdf']['iterations']
 
 @app.route("/")
 def home():
@@ -47,7 +57,7 @@ def encrypt():
         
         try:
             # clamp iterations defensively
-            iterations = max(1, min(iterations, 2_000_000))
+            iterations = max(kdf_config['min'], min(iterations, kdf_config['max']))
             ciphertext = ncrypt(passphrase, plaintext, iterations)
             return render_template(
                 "encrypt.html",
@@ -58,6 +68,7 @@ def encrypt():
                 ciphertext=ciphertext,
                 status_message="Encryption completed successfully!",
                 status_type="success",
+                kdf_config=kdf_config
             )
         except Exception as err:
             return render_template(
@@ -68,7 +79,7 @@ def encrypt():
             )
     
     # GET
-    return render_template("encrypt.html", page="encrypt")
+    return render_template("encrypt.html", page="encrypt", kdf_config=kdf_config)
 
 @app.route("/decrypt", methods=["GET", "POST"])
 def decrypt():

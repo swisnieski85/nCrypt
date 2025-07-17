@@ -1,0 +1,16 @@
+kdf:
+  algorithm: PBKDF2
+  hash: sha256
+  iterations:
+    default: 310000
+    min: 100000
+    max: 50000000
+
+encryption:
+  algorithm: AES
+  mode: GCM
+  key_size: 256
+
+defaults:
+  salt_length: 16
+  nonce_length: 12

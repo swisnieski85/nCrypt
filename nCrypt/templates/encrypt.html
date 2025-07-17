@@ -32,6 +32,12 @@
 	</head>
 	<body>
 		<script>
+			const KDF_ITERATIONS = {
+				min: {{ kdf_config.min }},
+				max: {{ kdf_config.max }},
+				default: {{ kdf_config.default }}
+			};
+			
 			document.addEventListener('DOMContentLoaded', function() {
 				const iterationsInput = document.getElementById('iterations');
 				const copyButton = document.getElementById('copy-button');
@@ -42,10 +48,10 @@
 					iterationsInput.addEventListener('blur', function(e) {
 						let value = parseFloat(e.target.value);
 						
-						if (isNaN(value) || value < 100000) {
-							e.target.value = 100000;
-						} else if (isNaN(value) || value > 5000000) {
-							e.target.value = 5000000
+						if (isNaN(value) || value < KDF_ITERATIONS.min) {
+							e.target.value = KDF_ITERATIONS.min;
+						} else if (isNaN(value) || value > KDF_ITERATIONS.max) {
+							e.target.value = KDF_ITERATIONS.max
 						} else {
 							e.target.value = Math.floor(value);
 						}
@@ -120,7 +126,7 @@
 					</div>
 					<div class="input-group">
 						<label for="iterations">n(umber of Encryption Iterations)</label>
-						<input type="number" id="iterations" name="iterations" value="200000" min="10000" step="1" placeholder="200000">
+						<input type="number" id="iterations" name="iterations" value="{{ kdf_config.default }}" min="{{ kdf_config.min }}" step="1" placeholder="{{ kdf_config.max }}">
 					</div>
 				</div>
 				<br>

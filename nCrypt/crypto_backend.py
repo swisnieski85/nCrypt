@@ -20,12 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os, base64, struct
+import os
+import base64
+import struct
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
+
 
 def derive_key(passphrase: bytes, salt: bytes, iterations: int) -> bytes:
     kdf = PBKDF2HMAC(
@@ -37,7 +40,7 @@ def derive_key(passphrase: bytes, salt: bytes, iterations: int) -> bytes:
     )
     return kdf.derive(passphrase)
 
-def encrypt(passphrase: str, plaintext: str, iterations: int = 200_000) -> str:
+def encrypt(passphrase: str, plaintext: str, iterations: int = 310_000) -> str:
     p_bytes = plaintext.encode()
     pass_bytes = passphrase.encode()
 
