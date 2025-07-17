@@ -5,7 +5,7 @@ All notable changes to the nCrypt project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This project adheres to [Semantic Versioning](https://semver.org/).
 
 
-## [1.2.1] - 2025-07-18
+## [1.2.1] - 2025-07-17
 ### Added
 - Added `config.yaml` for static parameters, currently containing only KDF iteration bounds.
 
