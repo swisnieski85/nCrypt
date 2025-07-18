@@ -29,8 +29,10 @@ pip install -r requirements.txt
 Contents of `requirements.txt`:
 
 ```
-Flask==3.1.1
 cryptography==45.0.5
+Flask==3.1.1
+flask_wtf==1.2.2
+PyYAML==6.0.2
 ```
 
 ### Setup
